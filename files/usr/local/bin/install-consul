@@ -2,15 +2,7 @@
 
 set -e
 
-# Yes, I know this is horribly simplistic, but it's better than the previous
-# version, which just assumed everyone was amd64
-if ldd /bin/ls | grep -q x86-64; then
-	consul_arch="amd64"
-else
-	consul_arch="386"
-fi
-
-/usr/bin/wget -O /tmp/consul.zip https://dl.bintray.com/mitchellh/consul/0.5.0_linux_${consul_arch}.zip
+/usr/bin/wget -O /tmp/consul.zip https://releases.hashicorp.com/consul/0.5.0/consul_0.5.0_linux_amd64.zip
 
 trap "rm -f /tmp/consul.zip" EXIT
 
