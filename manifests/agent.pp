@@ -36,10 +36,23 @@ define consul::agent(
 		}
 	}
 
+  class { 'datadog_agent::integrations::consul':
+    url               => 'http://localhost:8500',
+    catalog_checks    => true,
+    new_leader_checks => true,
+  }
+
+  file { "/var/local/consul/${name}/default.json":
+    content => '{"statsd_addr": "127.0.0.1:8125"}',
+    mode   => 0700,
+    owner  => 'consul',
+    group  => 'consul',
+  }
+
 	daemontools::service { "consul-${name}":
-		command => "/usr/local/bin/consul agent${server_opt}${join_opt}${adv_opt} -client=${client_address} -node=${name} -dc=${dc} -data-dir=/var/local/consul/${name} -pid-file=/var/local/consul/${name}.pid",
+		command => "/usr/local/bin/consul agent${server_opt}${join_opt}${adv_opt} -client=${client_address} -node=${name} -dc=${dc} -data-dir=/var/local/consul/${name} -pid-file=/var/local/consul/${name}.pid -config-file=/var/local/consul/${name}/default.json",
 		user    => "consul",
-		require => File["/var/local/consul/${name}"],
+		require => File["/var/local/consul/${name}", "/var/local/consul/${name}/default.json"],
 		environment => {
 			"GOMAXPROCS" => "2",
 		}
