@@ -1,40 +1,42 @@
+# installs and configures Consul agents (both client and server)
 define consul::agent(
-		$server         = false,
-		$dc             = "dc1",
-		$join           = undef,
-		$client_address = "127.0.0.1",
-		$advertise      = undef,
-		$expect         = undef,
+    $server         = false,
+    $dc             = 'dc1',
+    $join           = undef,
+    $client_address = '127.0.0.1',
+    $advertise      = undef,
+    $expect         = undef,
 ) {
-	include consul::install
+  include consul::install
 
-	file { "/var/local/consul/${name}":
-		ensure => directory,
-		mode   => 0700,
-		owner  => "consul",
-		group  => "consul",
-	}
+  $work_dir = "/var/local/consul/${name}"
 
-	if $server {
-		if $expect == undef {
-			fail "I don't know how many servers to expect"
-		}
+  file { $work_dir:
+    ensure => directory,
+    mode   => '0700',
+    owner  => 'consul',
+    group  => 'consul',
+  }
 
-		$server_opt = " -server -bootstrap-expect=$expect"
-	}
+  if $server {
+    if $expect == undef {
+      fail "I don't know how many servers to expect"
+    }
 
-	if $advertise {
-		$adv_opt = " -advertise ${advertise}"
-	}
+    $server_opt = " -server -bootstrap-expect=${expect}"
+  }
 
-	if $join {
-		if $join =~ /:.*:/ {
-			# Fuck you, Go, and your retro-90s style IPv6 address formats
-			$join_opt = " -retry-join='[${join}]:8301'"
-		} else {
-			$join_opt = " -retry-join=$join"
-		}
-	}
+  if $advertise {
+    $adv_opt = " -advertise ${advertise}"
+  }
+
+  if $join {
+    if $join =~ /:.*:/ {
+      $join_opt = " -retry-join='[${join}]:8301'"
+    } else {
+      $join_opt = " -retry-join=${join}"
+    }
+  }
 
   class { 'datadog_agent::integrations::consul':
     url               => 'http://localhost:8500',
@@ -42,19 +44,19 @@ define consul::agent(
     new_leader_checks => true,
   }
 
-  file { "/var/local/consul/${name}/default.json":
+  file { "${work_dir}/default.json":
     content => '{"statsd_addr": "127.0.0.1:8125"}',
-    mode   => 0700,
-    owner  => 'consul',
-    group  => 'consul',
+    mode    => '0700',
+    owner   => 'consul',
+    group   => 'consul',
   }
 
-	daemontools::service { "consul-${name}":
-		command => "/usr/local/bin/consul agent${server_opt}${join_opt}${adv_opt} -client=${client_address} -node=${name} -dc=${dc} -data-dir=/var/local/consul/${name} -pid-file=/var/local/consul/${name}.pid -config-file=/var/local/consul/${name}/default.json",
-		user    => "consul",
-		require => File["/var/local/consul/${name}", "/var/local/consul/${name}/default.json"],
-		environment => {
-			"GOMAXPROCS" => "2",
-		}
-	}
+  daemontools::service { "consul-${name}":
+    command     => "/usr/local/bin/consul agent${server_opt}${join_opt}${adv_opt} -client=${client_address} -node=${name} -dc=${dc} -data-dir=${work_dir} -pid-file=${work_dir}.pid -config-file=${work_dir}/default.json",
+    user        => 'consul',
+    require     => File[$work_dir, "${work_dir}/default.json"],
+    environment => {
+      'GOMAXPROCS' => '2',
+    }
+  }
 }
