@@ -39,7 +39,7 @@ define consul::agent(
   }
 
   class { 'datadog_agent::integrations::consul':
-    url               => 'http://localhost:8500',
+    url               => 'http://consul:8500',
     catalog_checks    => true,
     new_leader_checks => true,
   }
