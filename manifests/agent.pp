@@ -6,6 +6,11 @@ define consul::agent(
     $client_address = '127.0.0.1',
     $advertise      = undef,
     $expect         = undef,
+    $encrypt        = undef,
+    $acl_token      = undef,
+    $ui             = false,
+    $cert_dir       = undef,
+    $statsd_addr    = '127.0.0.1:8125',
 ) {
   include consul::install
 
@@ -45,14 +50,14 @@ define consul::agent(
   }
 
   file { "${work_dir}/default.json":
-    content => '{"statsd_addr": "127.0.0.1:8125"}',
+    content => template('consul/default.json.erb'),
     mode    => '0700',
     owner   => 'consul',
     group   => 'consul',
   }
 
   daemontools::service { "consul-${name}":
-    command     => "/usr/local/bin/consul agent${server_opt}${join_opt}${adv_opt} -client=${client_address} -node=${name} -dc=${dc} -data-dir=${work_dir} -pid-file=${work_dir}.pid -config-file=${work_dir}/default.json",
+    command     => "/usr/local/bin/consul agent${server_opt}${join_opt}${adv_opt} -client=${client_address} -node=${name} -pid-file=${work_dir}.pid -config-file=${work_dir}/default.json",
     user        => 'consul',
     require     => File[$work_dir, "${work_dir}/default.json"],
     environment => {

@@ -1,0 +1,19 @@
+{ <% if @acl_token %>
+  "acl_master_token": "<%= @acl_token %>",
+  "acl_datacenter": "<%= @dc %>",
+  "acl_default_policy": "deny",
+  <% end %>
+  "datacenter": "<%= @dc %>",
+  "data_dir": "<%= @work_dir %>",
+  <% if @encrypt %>
+  "encrypt": "<%= @encrypt %>",
+  <% end %>
+  "ui": <%= @ui %>,
+  <% if @cert_dir %>
+  "key_file": "<%= @cert_dir %>/privkey.pem",
+  "cert_file": "<%= @cert_dir %>/fullchain.pem",
+  <% end %>
+  "telemetry": {
+     "statsd_address": "<%= @statsd_addr %>"
+  }
+}

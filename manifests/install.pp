@@ -1,11 +1,11 @@
 # Install class for Consul
 class consul::install(
-    $version         = '0.7.0',
+    $version         = '0.7.1',
 ) {
   file { '/var/local/consul':
     ensure => directory,
     mode   => '0730',
-    owner  => 'root',
+    owner  => 'consul',
     group  => 'consul',
   }
 
