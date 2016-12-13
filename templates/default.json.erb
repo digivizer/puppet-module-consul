@@ -10,6 +10,10 @@
   <% end %>
   "ui": <%= @ui %>,
   <% if @cert_dir %>
+  "ports": {
+    "https": 8443
+  },
+
   "key_file": "<%= @cert_dir %>/privkey.pem",
   "cert_file": "<%= @cert_dir %>/fullchain.pem",
   <% end %>

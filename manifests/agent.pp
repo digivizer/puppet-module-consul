@@ -23,6 +23,15 @@ define consul::agent(
     group  => 'consul',
   }
 
+  if $cert_dir {
+    file { $cert_dir:
+      ensure => directory,
+      mode   => '0700',
+      owner  => 'consul',
+      group  => 'consul',
+    }
+  }
+
   if $server {
     if $expect == undef {
       fail "I don't know how many servers to expect"

@@ -4,7 +4,7 @@ class consul::install(
 ) {
   file { '/var/local/consul':
     ensure => directory,
-    mode   => '0730',
+    mode   => '0700',
     owner  => 'consul',
     group  => 'consul',
   }
