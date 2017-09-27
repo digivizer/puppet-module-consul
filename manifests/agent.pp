@@ -52,12 +52,6 @@ define consul::agent(
     }
   }
 
-  class { 'datadog_agent::integrations::consul':
-    url               => 'http://consul:8500',
-    catalog_checks    => true,
-    new_leader_checks => true,
-  }
-
   file { "${work_dir}/default.json":
     content => template('consul/default.json.erb'),
     mode    => '0700',
